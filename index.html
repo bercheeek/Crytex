@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crytex Project</title>
+  <style>
+    :root {
+      --bg: radial-gradient(ellipse at center, #1a1a1a, #0c0c0c);
+      --text: #eee;
+      --card-bg: rgba(0,0,0,0.5);
+      --button-bg: linear-gradient(135deg,#333,#555);
+      --button-hover: linear-gradient(135deg,#555,#777);
+      --neon: #0bf;
+    }
+    body.light {
+      --bg: #f1f1f1;
+      --text: #111;
+      --card-bg: rgba(255,255,255,0.85);
+      --button-bg: linear-gradient(135deg,#ccc,#eee);
+      --button-hover: linear-gradient(135deg,#bbb,#ddd);
+      --neon: #08f;
+    }
+    * {
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+    }
+    body, html {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      padding: 15px 30px;
+      background: rgba(0,0,0,0.4);
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 1.2em;
+      text-shadow: 0 0 8px rgba(255,255,255,0.2);
+      font-weight: bold;
+      cursor: default;
+    }
+    .theme-toggle {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.2em;
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+    }
+    .nav button {
+      background: none; border: none;
+      color: var(--text); font-size: 1em;
+      cursor: pointer; padding: 8px 16px;
+      margin-left: 12px; border-radius: 4px;
+    }
+    .nav button:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    #preloader {
+      position: fixed; inset: 0;
+      background: #000; display: flex;
+      align-items: center; justify-content: center;
+      z-index: 100;
+      color: #fff; font-size: 2em;
+    }
+    section {
+      position: absolute;
+      top: 60px; left: 0; right: 0; bottom: 0;
+      overflow-y: auto;
+      opacity: 0; transform: translateY(30px);
+      transition: all 0.6s ease;
+      pointer-events: none;
+      padding-bottom: 60px;
+    }
+    section.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .content {
+      margin: 0 auto;
+      padding: 80px 20px 60px;
+      max-width: 900px;
+    }
+    .glass-box {
+      background: var(--card-bg);
+      padding: 40px 30px;
+      border-radius: 12px;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 0 20px rgba(255,255,255,0.05);
+      margin-bottom: 40px;
+    }
+    h1 {
+      font-size: 2.8em;
+      text-shadow:
+        0 0 5px var(--neon),
+        0 0 10px var(--neon),
+        0 0 20px var(--neon),
+        0 0 40px var(--neon);
+      margin-bottom: 20px;
+      animation: neonPulse 3s infinite alternate;
+    }
+    @keyframes neonPulse {
+      from {
+        text-shadow:
+          0 0 5px var(--neon),
+          0 0 10px var(--neon),
+          0 0 20px var(--neon),
+          0 0 40px var(--neon);
+      }
+      to {
+        text-shadow:
+          0 0 10px var(--neon),
+          0 0 20px var(--neon),
+          0 0 30px var(--neon),
+          0 0 50px var(--neon);
+      }
+    }
+    .button {
+      padding: 12px 28px;
+      background: var(--button-bg);
+      color: var(--text);
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      box-shadow: 0 0 12px rgba(0,191,255,0.2);
+      transition: all 0.3s;
+      cursor: pointer;
+      display: inline-block;
+      font-weight: 600;
+      user-select: none;
+    }
+    .button:hover {
+      background: var(--button-hover);
+      box-shadow: 0 0 20px rgba(0,191,255,0.6);
+      transform: scale(1.05);
+    }
+    .stats {
+      font-size: 1.2em;
+      margin: 20px 0;
+    }
+    .feature-list {
+      text-align: left;
+      font-size: 1.1em;
+      line-height: 1.6em;
+      list-style: disc inside;
+      margin-left: 0;
+      padding-left: 0;
+    }
+    .feature-list li {
+      margin-bottom: 12px;
+    }
+    .timer {
+      font-size: 1.2em;
+      color: var(--neon);
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .footer textarea {
+      width: 80%;
+      padding: 10px;
+      margin-top: 10px;
+      background: #111;
+      color: #eee;
+      border: none;
+      border-radius: 6px;
+      resize: none;
+      font-size: 1em;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .footer button {
+      padding: 10px 24px;
+      margin-top: 10px;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 600;
+      user-select: none;
+    }
+    .footer button:hover {
+      background: #666;
+    }
+    .popup {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      align-items: center; justify-content: center;
+      color: #fff; font-size: 2em;
+      z-index: 1000;
+      text-align: center;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="preloader">Watermark Loading...</div>
+  <canvas id="stars"></canvas>
+
+  <header>
+    <div class="logo">Crytex</div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+    <div class="nav">
+      <button onclick="showMain()">Download</button>
+      <button onclick="showNew()">Home</button>
+    </div>
+  </header>
+
+  <section id="mainSection" class="active">
+    <div class="content">
+      <div class="glass-box">
+        <h1>With Us, You Will Be Power.</h1>
+        <a href="https://download1640.mediafire.com/e1u9y6kjztcgU-eEjAsGAivkYxMIHDTRtqJS2Uuw9f08eSUnhLpboPpY4KnNyAQzaukgQHd11DlzBWDLlHnBN6CNfDNFBQG66DPbHLMDOBQ_UoW-Gns2I_2DtzMY_BM4tg9s3iHnq4mGthmFa3pdGUoJN49zXexS3x7GCirH6tyI4Q/fzbkwdjhhlhrbs8/CrytexCheatSeliware.exe" class="button" target="_blank" rel="noopener noreferrer" id="downloadBtn">Download</a>
+        <div class="stats">
+          <div><strong>Downloads:</strong> <span id="dlCount">0</span></div>
+          <div class="timer">Next update in: <span id="updateTimer">--:--:--</span></div>
+        </div>
+        <ul class="feature-list">
+          <li><strong>Built‑in Injectors:</strong> Two integrated options</li>
+          <li><strong>Custom Injector:</strong> Exclusive Crytex injector</li>
+          <li><strong>Anti-Ban & Anti-Kick:</strong> Session security</li>
+          <li><strong>Script Search:</strong> Find by game name</li>
+          <li><strong>Stealer Protection:</strong> Anti-script theft</li>
+        </ul>
+      </div>
+      <div class="footer">
+        <h2>Contact the Developer</h2>
+        <textarea id="msg" rows="4" placeholder="Write something..."></textarea><br/>
+        <button onclick="sendFake()">Send</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="newSection">
+    <div class="content">
+      <div class="glass-box">
+        <h1>Welcome to the New Section</h1>
+        <p>This section is a placeholder. You can put anything here.</p>
+        <a href="#" class="button">Sample Action</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="popup" id="popup">Please wait...</div>
+
+<script>
+  // Theme toggle and persistency
+  const body = document.body;
+  const themeToggle = document.getElementById('themeToggle');
+
+  function setTheme(dark) {
+    if (dark) {
+      body.classList.remove('light');
+      themeToggle.textContent = '🌙';
+      localStorage.setItem('theme', 'dark');
+    } else {
+      body.classList.add('light');
+      themeToggle.textContent = '☀️';
+      localStorage.setItem('theme', 'light');
+    }
+  }
+
+  themeToggle.onclick = () => {
+    setTheme(body.classList.contains('light'));
+  };
+
+  // Load saved theme on page load
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light') {
+    setTheme(false);
+  } else {
+    setTheme(true);
+  }
+
+  // Section switching
+  const mainSection = document.getElementById('mainSection');
+  const newSection = document.getElementById('newSection');
+
+  function showMain() {
+    newSection.classList.remove('active');
+    mainSection.classList.add('active');
+  }
+  function showNew() {
+    mainSection.classList.remove('active');
+    newSection.classList.add('active');
+  }
+
+  // Stars canvas
+  const canvas = document.getElementById('stars');
+  const ctx = canvas.getContext('2d');
+  let w, h;
+  let stars = [];
+
+  function setupCanvas() {
+    w = window.innerWidth;
+    h = window.innerHeight;
+    canvas.width = w;
+    canvas.height = h;
+    stars = [];
+    for (let i = 0; i < 130; i++) {
+      stars.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        size: Math.random() * 1.5 + 0.3,
+        alpha: Math.random(),
+        alphaChange: (Math.random() * 0.02) + 0.002
+      });
+    }
+  }
+
+  function drawStars() {
+    ctx.clearRect(0, 0, w, h);
+    for (let star of stars) {
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(255,255,255,${star.alpha.toFixed(2)})`;
+      ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+      ctx.fill();
+      star.alpha += star.alphaChange;
+      if (star.alpha >= 1) star.alphaChange = -star.alphaChange;
+      if (star.alpha <= 0) star.alphaChange = -star.alphaChange;
+    }
+    requestAnimationFrame(drawStars);
+  }
+
+  window.addEventListener('resize', () => {
+    setupCanvas();
+  });
+
+  setupCanvas();
+  drawStars();
+
+  // Preloader hide
+  window.onload = () => {
+    setTimeout(() => {
+      document.getElementById('preloader').style.display = 'none';
+    }, 1000);
+  };
+
+  // Downloads counter with localStorage per browser
+  const dlCountElem = document.getElementById('dlCount');
+  let downloads = Number(localStorage.getItem('downloads')) || 0;
+
+  // Increase downloads on every page visit (in this browser only)
+  downloads++;
+  localStorage.setItem('downloads', downloads);
+  dlCountElem.textContent = downloads;
+
+  // Update timer for next update (countdown to a fixed date)
+  const updateTimerElem = document.getElementById('updateTimer');
+
+  // Set next update date/time (e.g. 3 days from now)
+  const nextUpdate = new Date();
+  nextUpdate.setHours(nextUpdate.getHours() + 72); // 72 hours later
+
+  function updateCountdown() {
+    const now = new Date();
+    let diff = nextUpdate - now;
+    if (diff < 0) {
+      diff = 0;
+    }
+    const h = Math.floor(diff / 1000 / 60 / 60);
+    const m = Math.floor((diff / 1000 / 60) % 60);
+    const s = Math.floor((diff / 1000) % 60);
+    updateTimerElem.textContent = 
+      `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+  }
+
+  setInterval(updateCountdown, 1000);
+  updateCountdown();
+
+  // Fake send button for message
+  function sendFake() {
+    const msg = document.getElementById('msg').value.trim();
+    if (!msg) {
+      alert('Please write a message first.');
+      return;
+    }
+    alert('Thank you for your message! Developer will respond soon.');
+    document.getElementById('msg').value = '';
+  }
+</script>
+
+</body>
+</html>
